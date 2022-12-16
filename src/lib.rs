@@ -1,13 +1,24 @@
+extern crate core;
+
+use once_cell::sync::Lazy;
 use ext_php_rs::args::Arg;
 use ext_php_rs::builders::FunctionBuilder;
 use ext_php_rs::convert::IntoZval;
 use ext_php_rs::flags::DataType;
 use ext_php_rs::prelude::*;
-use ext_php_rs::types::{ZendClassObject, Zval};
+use ext_php_rs::types::{Zval};
 use ext_php_rs::zend::ExecuteData;
-use reqwest::blocking::{Client, ClientBuilder};
 
-mod macros;
+
+static INSTANCE: Lazy<reqwest::blocking::Client> = Lazy::new(|| {
+    reqwest::blocking::Client::builder()
+        .http2_prior_knowledge()
+        .build().unwrap()
+});
+
+// TODO  pub extern "C" fn multi_reqwest(ex: &mut ExecuteData, retval: &mut Zval){
+//
+// }
 
 pub extern "C" fn reqwest(ex: &mut ExecuteData, retval: &mut Zval)
 {
@@ -31,9 +42,8 @@ pub extern "C" fn reqwest(ex: &mut ExecuteData, retval: &mut Zval)
 
     // todo prevent create new every one. use shared one for support multiplexing between php requests
     // https://github.com/seanmonstar/reqwest/discussions/1470
-    let client = reqwest::blocking::Client::new();
 
-    let response = match client.get(request).send() { // TODO pass whole request
+    let response = match INSTANCE.get(request).send() { // TODO pass whole request
         Ok(r) => r,
         Err(err) => {
             println!("Request failed: {}", err.to_string());
