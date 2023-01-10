@@ -1,6 +1,6 @@
 <?php
 
-//$body = reqwest("http://httpbin.org/get");
+//$body = reqwest("https://httpbin.org/get");
 //var_dump('body in php', $body);
 $body = reqwest("http://localhost:1444/sleep");
 
